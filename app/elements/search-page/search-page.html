@@ -1,0 +1,183 @@
+<dom-module id="search-page"> 
+  <style>
+    :host {
+      display: block;
+      width: 95%
+    }
+
+    :root {
+      --paper-fab-background: green;
+    }
+
+    .buttons {
+      padding: 10px;
+    }
+
+  </style>
+  <template>
+
+    <iron-pages attr-for-selected="data-route" selected="{{route}}">
+      <!-- ************************ -->
+      <!-- HOME -->
+      <!-- ************************ -->
+      <section data-route="home">
+        <div 
+          on-search-started="_searchInProgress"
+          on-search-finished="_searchFinished"
+          on-import-added="_addImport">
+
+          <paper-material elevation="1">
+            <p class="paper-font-body2">
+              <search-field items="{{items}}"></search-field>
+            </p>  
+          </paper-material>
+
+          <div class="layout vertical center" style="width: 100%">
+            <div class="buttons layout horizontal center">
+              
+              <!-- CLEAR button -->
+              <paper-button raised on-tap="_clear" disabled$="{{hidden}}">
+                <iron-icon icon="cancel"></iron-icon>
+                Clear
+              </paper-button>
+
+              <!-- IMPORT button -->
+              <paper-button raised on-tap="_navigateToImport" disabled$="{{hidden}}">
+                <iron-icon icon="input"></iron-icon>
+                Prepare (<span>{{nrOfImports}}</span>)
+              </paper-button>
+
+            </div>
+          </div>
+          
+          <search-result items="{{items}}"></search-result>
+
+          <div hidden$="{{!loading}}" class="layout vertical center">
+            <paper-spinner id="spinner" active></paper-spinner>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ************************ -->
+      <!-- IMPORT -->
+      <!-- ************************ -->
+      <section 
+        data-route="import"
+        on-import-removed="_decrementCounter">
+
+        <import-page 
+          items="{{itemsToBeImported}}"
+          counter="{{nrOfImports}}"
+          elems-selected="{{_hasImportElemsSelected}}"></import-page>
+        
+      </section>
+
+    </iron-pages>
+
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'search-page',
+        properties: {
+          
+          items: {
+            type: Array,
+            notify: true,
+            value: function() { return []; }
+          },
+
+          itemsToBeImported: {
+            type: Array,
+            notify: true,
+            value: function() { return []; }
+          },
+
+          hidden: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
+          loading: {
+            type: Boolean,
+            value: false
+          },
+
+          nrOfImports: {
+            type: Number,
+            value: 0,
+            notify: true
+          },
+
+          route: {
+            type: String,
+            value: 'home'
+          }
+        },
+
+        ready: function() {
+          this._searchFinished();
+        },
+
+        _clear: function() {
+          this.items = [];
+          this.itemsToBeImported = [];
+          this.hidden = true;
+          this.nrOfImports = 0;
+          this._checkHasImportElemsSelected();
+        },
+
+        _searchFinished: function() {
+          this.loading = false;
+          this.hidden = this.items.length === 0;
+        },
+
+        _searchInProgress: function() {
+          this.items = [];
+          this.loading = true;
+        },
+
+        _addImport: function(event) {
+          
+          if (!(this._containsElement(event.detail.contentId, this.itemsToBeImported))) {
+            this.nrOfImports = this.nrOfImports + 1;
+            // Polymer method for adding to itemsToBeImported so that notifications work properly
+            this.push('itemsToBeImported', event.detail);
+          } else {
+            console.log('Element already added');
+          }
+
+          this._checkHasImportElemsSelected();
+        },
+
+        _decrementCounter: function(event) {
+          this.nrOfImports = this.nrOfImports - 1;
+        },
+
+        _navigateToImport: function(event) {
+          page('/import');
+        },
+
+        _containsElement: function(contentId, array) {
+          var found = false;
+          array.forEach(function(elem) {
+            if (elem.contentId === contentId) {
+              found = true;
+            }
+          });
+          return found;
+        },
+
+        _checkHasImportElemsSelected: function() {
+          this._hasImportElemsSelected = this.itemsToBeImported.length > 0;
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

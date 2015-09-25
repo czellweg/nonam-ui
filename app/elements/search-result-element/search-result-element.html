@@ -1,0 +1,149 @@
+<dom-module id="search-result-element">
+  <style>
+    :host {
+      display: block;
+    }
+
+    .card {
+      width: 600px;
+    }
+
+    .card-text {
+      padding: 10px;
+    }
+
+    .round-button {
+      padding-left: 5px;
+    }
+
+    :root {
+      --paper-fab-background: green;
+    }
+
+    .grey-background {
+      background-color: lightgrey;
+    }
+
+    .grey-background:hover {
+      cursor: pointer;
+    }
+
+  </style>
+  <template>
+
+    <iron-ajax 
+       id="ajax"
+       content-type="application/json"
+       on-response="_queryResultsLoaded" 
+       on-error="_queryResultsError"
+       handle-as="json">
+    </iron-ajax>
+
+    <div class="layout center vertical" style="margin: 20px">
+      
+      <paper-material class="card" elevation="2" class="center layout">
+        
+        <div class="card-text layout horizontal"><i>Title:</i>&nbsp;<span>{{item.title}}</span>
+          <span class="flex"> </span>
+          
+          <paper-fab mini icon="add" on-tap="_addToImports"></paper-fab>
+
+        </div> 
+        <div class="card-text"><i>Author:</i> <span>{{item.author}}</span></div>
+        
+        <div class="grey-background layout vertical horizontal center"
+             data-content-id="{{item.contentId}}"
+             on-tap="_queryDetails">
+          
+          <paper-icon-button 
+            class="layout vertical center" 
+            icon="info"
+            data-content-id="{{item.contentId}}"
+            on-tap="_queryDetails"
+            hidden$="{{_loading}}">
+          </paper-icon-button>
+
+          <div hidden$="{{!_loading}}" class="layout vertical center" style="padding: 6px;">
+            <paper-spinner id="spinner" active></paper-spinner>
+          </div>
+          
+        </div>
+        
+        <div class="grey-background" hidden$="{{_isHidden}}">
+          <div class="card-text"><i>Sprache:</i> <span>{{item.sprache}}</span></div>
+          <div class="card-text"><i>Verlag / Herausgeber:</i> <span>{{item.verlag}}</span></div>
+          <div class="card-text"><i>Jahr:</i> <span>{{item.jahr}}</span></div>
+          <div class="card-text"><i>Autor:</i> <span>{{item.creators}}</span></div>
+        </div>
+
+      </paper-material>
+
+    </div>
+  </template> 
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'search-result-element',
+        properties: {
+          
+          item: {
+            type: Array
+          },
+
+          _isHidden: {
+            type: Boolean,
+            notify: true,
+            value: true
+          },
+
+          _isLoaded: {
+            type: Boolean,
+            value: false
+          },
+
+          _loading: {
+            type: Boolean,
+            value: false
+          }
+
+        },
+        
+        ready: function() {
+        },
+
+        _queryDetails: function(e) {
+           if( this._isLoaded) {
+            this._isHidden = !this._isHidden;
+           } else {
+            this._loading = true;
+            this.$.ajax.url = window.getBaseUrl() + 'query';
+            this.$.ajax.method = 'POST';
+            this.$.ajax.body = JSON.stringify(this.item);
+            this.$.ajax.generateRequest();
+           }
+
+        },
+
+        _queryResultsLoaded: function(e) {
+          console.log(e);
+          this._isHidden = false;
+          this._loading = false;
+          this._isLoaded = true;
+          this.item = e.detail.response;
+        },
+
+        _queryResultsError: function(request, error) {
+          console.log(error);
+          this._loading = false;
+        },
+
+        _addToImports: function(e) {
+          this.fire('import-added', this.item);
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

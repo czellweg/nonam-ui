@@ -1,0 +1,140 @@
+
+<dom-module id="import-page">
+  <style>
+    :host {
+      display: block;
+    }
+
+    :root {
+      --paper-fab-background: green;
+    }
+
+    .info-banner {
+      padding: 50px;
+      background-color: orange;
+    }
+
+  </style>
+  <template>
+
+    <div on-remove-from-imports="_removeFromImports">
+  
+      <div class="layout center vertical" style="margin: 20px">
+        <div class="layout vertical center" style="width: 100%" hidden$="{{!elemsSelected}}">
+          <div class="buttons layout horizontal center">
+            <paper-button raised on-tap="_goBack">
+              <iron-icon icon="arrow-back"></iron-icon>
+              Back
+            </paper-button>
+            <paper-button raised on-tap="_download" disabled$="{{hidden}}">
+              <iron-icon icon="file-download"></iron-icon>
+              Download File
+            </paper-button>
+
+          </div>
+        </div>
+
+        <template is="dom-repeat" items="{{items}}" indexAs="index">
+          <import-element item="{{item}}"></import-element>
+        </template>
+        
+        <div hidden$="{{elemsSelected}}">
+          <paper-material class="info-banner">
+            No elements have been selected for importing.
+          </paper-material>
+
+        </div>
+      </div>
+      
+      <div class="layout center vertical" style="padding-bottom: 10px;">
+        <paper-fab mini icon="arrow-back" on-tap="_goBack"></paper-fab>
+      </div>
+
+    </div>
+
+    <a id="downloadLink" target="_blank" style="display:none"></a>
+    <iron-ajax 
+       id="ajax"
+       content-type="application/json"
+       on-response="_createDownloadLink" 
+       on-error="_error"
+       handle-as="json">
+    </iron-ajax>
+
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'import-page',
+        properties: {
+          
+          items: {
+            type: Array,
+            notify: true,
+            value: function() { return []; }
+          },
+
+          elemsSelected: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+
+          counter: {
+            type: Number,
+            value: 0
+          }
+        },
+
+        _removeFromImports: function(event) {
+          // use the title as discriminator
+          var contentId = event.detail.contentId;
+          var index = -1;
+
+          this.items.forEach(function(elem, i) {
+            if (elem.contentId === contentId) {
+              index =  i;
+            }
+          });
+
+          if (index > -1) {
+            this.counter = this.counter - 1;
+            this.splice('items', index, 1);
+          }
+
+          this._checkHasImportElemsSelected();
+          this.fire('import-removed', {});
+        },
+
+        _checkHasImportElemsSelected: function() {
+          this.elemsSelected = this.items.length > 0;
+        },
+
+        _download: function(event) {
+          this.$.ajax.url = window.getBaseUrl() + 'transform';
+          this.$.ajax.method = 'POST';
+          this.$.ajax.body = JSON.stringify(this.items);
+          this.$.ajax.generateRequest();
+        },
+
+        _createDownloadLink: function(resp, detail) {
+          this.$.downloadLink.href = window.getBaseUrl() + 'download/' + detail.response;
+            //'downloadFile.html?url='+ this.backendUrl + '&ids=' + this.createCommaSeparatedIds();
+            // this might cause the browser
+          this.$.downloadLink.click();
+        },
+
+        _error: function(response) {
+          console.log(response);
+        },
+
+        _goBack: function(event) {
+          page('/');
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

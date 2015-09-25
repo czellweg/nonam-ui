@@ -1,0 +1,65 @@
+<dom-module id="search-result">
+  <style>
+    :host {
+      display: block;
+    }
+
+    .card {
+      width: 600px;
+      margin: 10px;
+    }
+
+    .card-text {
+      padding: 10px;
+    }
+
+    .checkbox {
+      padding-left: 5px;
+    }
+
+    .grey-background {
+      background-color: lightgrey;
+    }
+
+    .grey-background:hover {
+      cursor: pointer;
+    }
+
+  </style>
+  <template>
+
+    <iron-ajax 
+       id="ajax" 
+       on-response="_queryResultsLoaded" 
+       on-error="_queryResultsError"
+       handle-as="json">
+    </iron-ajax>
+
+    <div class="layout center vertical" style="margin: 20px">
+      <template is="dom-repeat" items="{{items}}">
+
+        <search-result-element item="{{item}}"></search-result-element>
+
+      </template>
+    </div>
+  </template> 
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'search-result',
+        properties: {
+          items: {
+            type: Array,
+            notify: true
+          }
+        },
+        
+        ready: function() {
+        }
+
+      });
+    })();
+  </script>
+
+</dom-module>

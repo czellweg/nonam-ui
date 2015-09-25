@@ -1,0 +1,436 @@
+<dom-module id="import-element">
+  <style>
+    :host {
+      display: block;
+    }
+
+    :root {
+      --paper-input-container-disabled: {
+        opacity: 0.66;
+      }
+
+      --paper-dropdown-menu-button: {
+        width: 285px;
+      }
+    }
+
+    .card {
+      width: 600px;
+    }
+
+    .card-text {
+      padding: 10px;
+    }
+
+    .round-button {
+      padding-left: 5px;
+    }
+
+    :root {
+      --paper-fab-background: red;
+    }
+
+    .grey-background {
+      background-color: lightgrey;
+    }
+
+    .grey-background:hover {
+      cursor: pointer;
+    }
+
+  </style>
+  <template>
+
+    <iron-ajax 
+       id="ajax"
+       content-type="application/json"
+       on-response="_queryResultsLoaded" 
+       on-error="_queryResultsError"
+       handle-as="json">
+    </iron-ajax>
+
+    <div class="layout center vertical" style="margin: 20px">
+      
+      <paper-material class="card" elevation="2" class="center layout">
+        
+        <div class="card-text layout horizontal">
+          <span class="flex"> </span>
+          <paper-fab mini icon="remove-circle" on-tap="_removeFromImports"></paper-fab>
+        </div> 
+        
+        <form is="iron-form" id="form_1" hidden$="{{_isHidden}}">
+
+          <div class="layout centered horizontal flex">
+            <paper-dropdown-menu 
+              class="flex"
+              id="nordAmerikaId" 
+              label="Nord-Amerika - N:"
+              on-iron-select="_dropdownSelected">
+              <paper-menu class="dropdown-content" selected="13">
+                <template is="dom-repeat" items="[[_nordAmerika]]" as="na">
+                  <paper-item>[[na]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+
+            <paper-dropdown-menu 
+              id="museologieId" 
+              class="flex"
+              label="Museologie - MU:"
+              on-iron-select="_dropdownSelected">
+              <paper-menu class="dropdown-content">
+                <template is="dom-repeat" items="[[_museologie]]" as="mu">
+                  <paper-item>[[mu]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-dropdown-menu 
+              class="flex"
+              id="sonstigeLaenderId" 
+              label="sonstige Länder - S:"
+              on-iron-select="_dropdownSelected">
+              <paper-menu class="dropdown-content" selected="2">
+                <template is="dom-repeat" items="[[_sonstigeLaender]]" as="land">
+                  <paper-item>[[land]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+
+            <paper-dropdown-menu 
+              id="bereicheId" 
+              class="flex"
+              label="Bereich:"
+              on-iron-select="_dropdownSelected">
+              <paper-menu class="dropdown-content">
+                <template is="dom-repeat" items="[[_bereiche]]" as="bereich">
+                  <paper-item>[[bereich]]</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Laufnummer:"
+              value="{{item.laufnummer}}"></paper-input>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Titel:"
+              value="{{item.title}}"></paper-input>
+          </div>
+          
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Autor:" 
+              value="{{item.author}}"></paper-input>
+
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Sprache:" 
+              value="{{item.sprache}}"></paper-input>
+          </div>
+          
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Ort:" 
+              value="{{item.ort}}"></paper-input>
+
+              <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Verlag:" 
+              value="{{item.verlag}}"></paper-input>
+
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Jahr:" 
+              value="{{item.jahr}}"></paper-input>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="ISBN:" 
+              value="{{item.isbn}}"></paper-input>
+
+              <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Seitenzahl:" 
+              value="{{item.seitenzahl}}"></paper-input>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Reihe:" 
+              value="{{item.reihe}}"></paper-input>
+
+              <paper-input 
+              class="flex" 
+              style="padding: 8px;" 
+              floatingLabel 
+              on-input="paperInputChanged"
+              label="Band:" 
+              value="{{item.band}}"></paper-input>
+          </div>
+
+          <div class="layout centered horizontal">
+            <paper-input 
+              id="schlagwoerter"
+              class="flex"
+              style="padding: 8px;" 
+              floatingLabel
+              on-input="paperInputChanged"
+              label="Schlagwörter:" 
+              value="{{item.schlagwoerter}}"></paper-input>
+          </div>
+
+          
+        </form>
+        
+      </paper-material>
+
+    </div>
+  </template> 
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'import-element',
+        properties: {
+          
+          item: {
+            type: Array,
+            notify: true
+          },
+
+          _isHidden: {
+            type: Boolean,
+            notify: true,
+            value: true
+          },
+
+          _isLoaded: {
+            type: Boolean,
+            value: false
+          },
+
+          _sonstigeLaender: {
+            type: Array,
+            value: function() { 
+              return [
+              '<leer>',
+              '00 Allgemein',
+              '01 Arktis',
+              '02 Subartkis',
+              '03 Nordwestküste',
+              '11 Mexiko',
+              '12 Guatemala',
+              '13 Belice',
+              '14 El Salvador',
+              '15 Honduras',
+              '16 Nicaragua',
+              '17 Costa Rica',
+              '18 Panama',
+              '19 Kuba',
+              '20 Karibik',
+              '21 Venezuela',
+              '22 Kolumbien',
+              '23 Ecuador',
+              '24 Peru',
+              '25 Bolivien',
+              '26 Chile',
+              '27 Argentinien',
+              '28 Uruguay',
+              '29 Paraguay',
+              '30 Brasilien',
+              '31 Suriname',
+              '99 Andere',
+              ' '
+              ]; 
+            }
+          },
+          _nordAmerika: {
+            type: Array,
+            value: function() { 
+              return [
+                '<leer>',
+                '00 Allgemein',
+                '01 Arktis',
+                '02 Subartkis',
+                '03 Nordwestküste',
+                '04 Kalifornien',
+                '05 Hochplateau',
+                '06 Grosses Becken',
+                '07 Südwesten',
+                '08 Prärie & Plains',
+                '09 Nordöstliches Waldland',
+                '10 Südöstliches Waldland',
+                'AR Archiv NONAM',
+                'WP Wenger-Peek Cicumpolar Collection',
+                ' '
+              ]; 
+            }
+          },
+          
+          _bereiche: {
+            type: Array,
+            value: function() { 
+              return [
+                '<leer>',
+                'Sachbücher / SA',
+                'Reiseberichte, Expeditionen / BE',
+                'Fotobände, Fotografien / FO',
+                'Bildbände / BB',
+                'Legenden, Mythen, Märchen / LM',
+                'Jugend- und Kinderbücher / JK',
+                'Belletristik / BL',
+                'Kunst und Handwerk / KH',
+                'Religion, Spiritualität / RE',
+                'Museumspädagogik / MP',
+                'Lehrerbibliothek / LB',
+                'Datenträger / DT',
+                'Werken und Gestalten / WG',
+                'Musik / MK'
+              ]; 
+            }
+          },
+          
+          _museologie: {
+            type: Array,
+            value: function() { 
+              return [
+                '<leer>',
+                'SA Sachbücher / Theorie',
+                'KA Kataloge',
+                'Video/DVD HU',
+
+                'PE Archiv Personenregister',
+                'OR Archiv Organisationenregister',
+                'ST Archiv Stichwortregister',
+                'ET Archiv Ethnienregister',
+                'KU Archiv Kulturarealregister',
+                'DI Archiv Diverses',
+
+                'NA Archiv NONAM Ausstellungen / Veranstaltungen',
+                'NG Archiv NONAM Geschichte',
+                'NR Archiv NONAM Reisen',
+                'NS Archiv NONAM Schenkungen / Sammlungen',
+                'ND Archiv NONAM Drucksachen',
+
+                'DK Dokumentationen'
+              ]; 
+            }
+          }
+
+        },
+        
+        ready: function() {
+          this._queryDetails(null);
+
+
+/*  n;
+    s;
+    bereich;
+    mu;
+    bereichKurzzeichen;
+    standort;
+    laufnummer;
+    medienart;
+    reihe;
+    band;
+    urheber;
+    ort;
+    verlag;
+    jahr;
+    isbn;
+    sprache;
+    seitenzahl;
+    schlagwoerter; */
+          
+        },
+
+        _queryDetails: function(event) {
+           if( this._isLoaded) {
+            this._isHidden = !this._isHidden;
+           } else {
+            this.$.ajax.url = window.getBaseUrl() + 'query';
+            this.$.ajax.method = 'POST';
+            this.$.ajax.body = JSON.stringify(this.item);
+            this.$.ajax.generateRequest();
+           }
+
+        },
+
+        _queryResultsLoaded: function(e) {
+          this._isHidden = false;
+          this._isLoaded = true;
+          this.item = e.detail.response;
+        },
+
+        _queryResultsError: function(request, error) {
+          console.log(error);
+        },
+
+        _removeFromImports: function(event) {
+          this.fire('remove-from-imports', this.item);
+        },
+
+        _dropdownSelected: function(event) {
+          this.item.n = this.$.nordAmerikaId.selectedItemLabel;
+          this.item.s = this.$.sonstigeLaenderId.selectedItemLabel;
+          this.item.mu = this.$.museologieId.selectedItemLabel;
+          this.item.bereich = this.$.bereicheId.selectedItemLabel;
+        },
+
+        paperInputChanged: function(event) {
+
+          this.item[event.currentTarget.id] = event.target.value;
+          
+        }
+
+
+      });
+    })();
+  </script>
+
+</dom-module>

@@ -1,0 +1,74 @@
+<dom-module id="search-field">
+  <style>
+    :host {
+      display: block;
+      padding: 10px;
+    }
+  </style>
+  <template>
+    
+    <iron-ajax 
+       id="ajax" 
+       on-response="_searchResultsLoaded" 
+       on-error="_searchResultsError"
+       handle-as="json">
+    </iron-ajax>
+
+    <iron-a11y-keys target="{{}}" keys="enter" on-keys-pressed="_search"></iron-a11y-keys>
+
+    <!-- <paper-input id="searchField" label="Search Worldcat"></paper-input> -->
+
+    <paper-input id="searchField" label="Search Worldcat">
+      <paper-icon-button suffix icon="search" on-tap="_search"></paper-icon-button>
+    </paper-input>
+
+
+    <paper-toast id="toast"></paper-toast>
+
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'search-field',
+        properties: {
+          items: {
+            type: Array,
+            notify: true
+          }
+        },
+        ready: function() {
+          
+        },
+
+        _search: function() {
+
+          if (this.$.searchField.value !== null && this.$.searchField.value.length > 0) {
+            this.$.ajax.url = window.getBaseUrl() + 'search?q=' + encodeURIComponent(this.$.searchField.value);
+            this.$.ajax.generateRequest();
+          } else {
+            this.$.toast.text = 'Please enter a search term';
+            this.$.toast.show();
+          }
+          
+          this.fire('search-started', {});
+        }, 
+
+        _searchResultsLoaded: function(result) {
+          this.$.searchField.value = '';
+          this.items = result.detail.response;
+          this.fire('search-finished', {});
+        },
+
+        _searchResultsError: function(request, error) {
+          console.log(error);
+          this.$.toast.text = error.error.message;
+          this.$.toast.show();
+        }
+
+
+      });
+    })();
+  </script>
+
+</dom-module>
