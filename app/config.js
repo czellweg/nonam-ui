@@ -1,5 +1,5 @@
 var webconfig = {
-    baseUrl: 'http://localhost:8080/'
+    baseUrl: 'https://nonam-backend.herokuapp.com/'
 };
 
 function getBaseUrl() {

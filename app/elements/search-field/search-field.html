@@ -32,20 +32,35 @@
       Polymer({
         is: 'search-field',
         properties: {
+
           items: {
             type: Array,
             notify: true
           }
         },
+
         ready: function() {
           
         },
 
         _search: function() {
 
-          if (this.$.searchField.value !== null && this.$.searchField.value.length > 0) {
-            this.$.ajax.url = window.getBaseUrl() + 'search?q=' + encodeURIComponent(this.$.searchField.value);
+          var searchTerm = this.$.searchField.value;
+          if (searchTerm !== null && searchTerm.length > 0) {
+
+            if (searchTerm.toLowerCase().indexOf('isbn:') === 0) {
+              console.log('invoking ISBN search.');
+              searchTerm = searchTerm.substring(5);
+              searchTerm = searchTerm.trim().replace(/-/g, '');
+              // invoke the ISBN search method on the backend
+              this.$.ajax.url = window.getBaseUrl() + 'isbn/' + encodeURIComponent(searchTerm);
+            } else {
+              console.log('invoking normal search.');
+              this.$.ajax.url = window.getBaseUrl() + 'search?q=' + encodeURIComponent(this.$.searchField.value);
+            }
+            
             this.$.ajax.generateRequest();
+            
           } else {
             this.$.toast.text = 'Please enter a search term';
             this.$.toast.show();

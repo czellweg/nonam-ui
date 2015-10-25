@@ -84,7 +84,8 @@ gulp.task('images', function () {
 gulp.task('copy', function () {
   
   var urlConfig = gulp.src(['app/config.tmpl.js'])
-    .pipe($.replace(/BASE_URL/g,"http://localhost:8080/"))
+    //.pipe($.replace(/BASE_URL/g,"http://localhost:8080/"))
+    .pipe($.replace(/BASE_URL/g,"https://nonam-backend.herokuapp.com/"))
     .pipe($.rename('app/config.js'))
     .pipe(gulp.dest('./'));
 
