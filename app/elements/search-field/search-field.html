@@ -14,11 +14,11 @@
        handle-as="json">
     </iron-ajax>
 
-    <iron-a11y-keys target="{{}}" keys="enter" on-keys-pressed="_search"></iron-a11y-keys>
+    <iron-a11y-keys target="[[_target]]" keys="enter" on-keys-pressed="_search"></iron-a11y-keys>
 
     <!-- <paper-input id="searchField" label="Search Worldcat"></paper-input> -->
 
-    <paper-input id="searchField" label="Search Worldcat">
+    <paper-input id="searchField" label="Search Worldcat" value="{{userInput::input}}" >
       <paper-icon-button suffix icon="search" on-tap="_search"></paper-icon-button>
     </paper-input>
 
@@ -33,9 +33,21 @@
         is: 'search-field',
         properties: {
 
+          userInput: {
+            type: String,
+            notify: true,
+          },
+
           items: {
             type: Array,
             notify: true
+          },
+
+          _target: {
+            type: Object,
+            value: function() {
+              return this.$.searchField;
+            }
           }
         },
 
@@ -45,7 +57,7 @@
 
         _search: function() {
 
-          var searchTerm = this.$.searchField.value;
+          var searchTerm = this.userInput;
           if (searchTerm !== null && searchTerm.length > 0) {
 
             if (searchTerm.toLowerCase().indexOf('isbn:') === 0) {
@@ -72,6 +84,12 @@
         _searchResultsLoaded: function(result) {
           this.$.searchField.value = '';
           this.items = result.detail.response;
+
+          if (this.items.length === 0) {
+            this.$.toast.text = 'No result was found for the given query';
+            this.$.toast.show();
+          }
+
           this.fire('search-finished', {});
         },
 

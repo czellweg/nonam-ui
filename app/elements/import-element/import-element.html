@@ -393,7 +393,7 @@
            if( this._isLoaded) {
             this._isHidden = !this._isHidden;
            } else {
-            this.$.ajax.url = window.getBaseUrl() + 'query';
+            this.$.ajax.url = window.getBaseUrl() + 'details';
             this.$.ajax.method = 'POST';
             this.$.ajax.body = JSON.stringify(this.item);
             this.$.ajax.generateRequest();
